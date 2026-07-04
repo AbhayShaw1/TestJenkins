@@ -1,0 +1,2037 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "EHPS API",
+    "description" : "Equipment Health & Performance System — semiconductor fab equipment maintenance. Covers fab-coordinator machine/technician management, routine checkups, alert escalation and approval, repair assignment/completion, and the equipment health dashboard. All endpoints (except /api/auth/**) require a bearer JWT obtained from POST /api/auth/login, and are scoped by role: FAB_COORDINATOR, MANAGER, or TECHNICIAN. See docs/API-CONTRACT.md for the full endpoint contract.",
+    "version" : "2.0"
+  },
+  "servers" : [ {
+    "url" : "http://localhost",
+    "description" : "Generated server url"
+  } ],
+  "tags" : [ {
+    "name" : "Dashboard",
+    "description" : "Equipment health/performance history for reporting. Requires role MANAGER or FAB_COORDINATOR."
+  }, {
+    "name" : "Fab — Machines",
+    "description" : "Fab-coordinator management of their own registered machines. Requires role FAB_COORDINATOR."
+  }, {
+    "name" : "Technician — Checkups",
+    "description" : "Technician-facing checkup work: view assigned checkups and submit results. Requires role TECHNICIAN."
+  }, {
+    "name" : "Technician — Repairs",
+    "description" : "Technician-facing repair work: view assigned repair alerts and mark repairs complete. Requires role TECHNICIAN."
+  }, {
+    "name" : "Manager — Machines & Technicians",
+    "description" : "Manager read access to all machines and technicians across the fab (not scoped to a single owner). Requires role MANAGER."
+  }, {
+    "name" : "Fab — Checkup Assignments",
+    "description" : "Fab-coordinator assignment of technicians to routine machine checkups. Requires role FAB_COORDINATOR."
+  }, {
+    "name" : "Authentication",
+    "description" : "Public registration and login endpoints (no bearer token required)."
+  }, {
+    "name" : "Machine Types",
+    "description" : "Shared machine-type reference data, available to any authenticated role. Some sub-lists are further scoped by role."
+  }, {
+    "name" : "Manager — Alerts",
+    "description" : "Manager alert lifecycle: review escalated alerts and approve or reject them. Requires role MANAGER."
+  }, {
+    "name" : "Fab — Technicians",
+    "description" : "Fab-coordinator management of technicians. Requires role FAB_COORDINATOR."
+  }, {
+    "name" : "Fab — Alerts",
+    "description" : "Fab-coordinator alert lifecycle: review pending/approved alerts, escalate to manager, and assign repair technicians. Requires role FAB_COORDINATOR."
+  } ],
+  "paths" : {
+    "/api/fab/technicians/{technicianId}" : {
+      "get" : {
+        "tags" : [ "Fab — Technicians" ],
+        "summary" : "Get a technician by ID",
+        "description" : "Returns a single technician managed by the calling fab coordinator. Requires role FAB_COORDINATOR.",
+        "operationId" : "getTechnicianById",
+        "parameters" : [ {
+          "name" : "technicianId",
+          "in" : "path",
+          "description" : "Technician ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseTechnicianResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Fab — Technicians" ],
+        "summary" : "Update a technician",
+        "description" : "Updates an existing technician managed by the calling fab coordinator. Requires role FAB_COORDINATOR.",
+        "operationId" : "updateTechnician",
+        "parameters" : [ {
+          "name" : "technicianId",
+          "in" : "path",
+          "description" : "Technician ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateTechnicianRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseTechnicianResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/fab/machines/{machineId}" : {
+      "get" : {
+        "tags" : [ "Fab — Machines" ],
+        "summary" : "Get a machine by ID",
+        "description" : "Returns a single machine owned by the calling fab coordinator. Requires role FAB_COORDINATOR.",
+        "operationId" : "getMachineById",
+        "parameters" : [ {
+          "name" : "machineId",
+          "in" : "path",
+          "description" : "Machine ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseMachineResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Fab — Machines" ],
+        "summary" : "Update a machine",
+        "description" : "Updates an existing machine owned by the calling fab coordinator. Requires role FAB_COORDINATOR.",
+        "operationId" : "updateMachine",
+        "parameters" : [ {
+          "name" : "machineId",
+          "in" : "path",
+          "description" : "Machine ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateMachineRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseMachineResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/technician/repairs/alerts/{alertId}/completion" : {
+      "post" : {
+        "tags" : [ "Technician — Repairs" ],
+        "summary" : "Complete a repair",
+        "description" : "Marks the repair for the given alert as complete, recording the repair outcome. Requires role TECHNICIAN.",
+        "operationId" : "completeRepair",
+        "parameters" : [ {
+          "name" : "alertId",
+          "in" : "path",
+          "description" : "Alert ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CompleteRepairRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseCompleteRepairResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/technician/checkups/machines/{machineId}/results" : {
+      "post" : {
+        "tags" : [ "Technician — Checkups" ],
+        "summary" : "Submit checkup results",
+        "description" : "Records the results of a performed checkup on the given machine, raising alerts if parameters are out of range. Requires role TECHNICIAN.",
+        "operationId" : "performCheckup",
+        "parameters" : [ {
+          "name" : "machineId",
+          "in" : "path",
+          "description" : "Machine ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PerformCheckupRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponsePerformCheckupResult"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/manager/alerts/{alertId}/rejection" : {
+      "post" : {
+        "tags" : [ "Manager — Alerts" ],
+        "summary" : "Reject an alert",
+        "description" : "Rejects an escalated alert. Requires role MANAGER.",
+        "operationId" : "rejectAlert",
+        "parameters" : [ {
+          "name" : "alertId",
+          "in" : "path",
+          "description" : "Alert ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseAlertActionResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/manager/alerts/{alertId}/approval" : {
+      "post" : {
+        "tags" : [ "Manager — Alerts" ],
+        "summary" : "Approve an alert",
+        "description" : "Approves an escalated alert, allowing it to proceed to repair assignment. Requires role MANAGER.",
+        "operationId" : "approveAlert",
+        "parameters" : [ {
+          "name" : "alertId",
+          "in" : "path",
+          "description" : "Alert ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseAlertActionResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/fab/technicians" : {
+      "get" : {
+        "tags" : [ "Fab — Technicians" ],
+        "summary" : "List all technicians",
+        "description" : "Returns all technicians managed by the calling fab coordinator. Requires role FAB_COORDINATOR.",
+        "operationId" : "getAllTechnicians",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListTechnicianResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Fab — Technicians" ],
+        "summary" : "Register a new technician",
+        "description" : "Creates a new technician account managed by the calling fab coordinator. Requires role FAB_COORDINATOR.",
+        "operationId" : "addTechnician",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AddTechnicianRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseTechnicianResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/fab/machines" : {
+      "get" : {
+        "tags" : [ "Fab — Machines" ],
+        "summary" : "List my machines",
+        "description" : "Returns all machines owned by the calling fab coordinator. Requires role FAB_COORDINATOR.",
+        "operationId" : "getMyMachines",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListMachineResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Fab — Machines" ],
+        "summary" : "Register a new machine",
+        "description" : "Adds a new machine owned by the calling fab coordinator. Requires role FAB_COORDINATOR.",
+        "operationId" : "addMachine",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AddMachineRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseMachineResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/fab/checkup-assignments" : {
+      "post" : {
+        "tags" : [ "Fab — Checkup Assignments" ],
+        "summary" : "Assign a technician to a checkup",
+        "description" : "Assigns a technician to perform a routine checkup on a machine. Requires role FAB_COORDINATOR.",
+        "operationId" : "assignTechnicianForCheckup",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AssignCheckupRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseCheckupAssignmentResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/fab/alerts/{alertId}/repair-assignment" : {
+      "post" : {
+        "tags" : [ "Fab — Alerts" ],
+        "summary" : "Assign a repair technician to an alert",
+        "description" : "Assigns a technician to repair the machine associated with an approved alert. Requires role FAB_COORDINATOR.",
+        "operationId" : "assignRepairTechnician",
+        "parameters" : [ {
+          "name" : "alertId",
+          "in" : "path",
+          "description" : "Alert ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AssignRepairRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseAssignRepairResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/fab/alerts/{alertId}/escalation" : {
+      "post" : {
+        "tags" : [ "Fab — Alerts" ],
+        "summary" : "Escalate an alert to manager",
+        "description" : "Sends a pending alert to the manager for approval. Requires role FAB_COORDINATOR.",
+        "operationId" : "sendToManager",
+        "parameters" : [ {
+          "name" : "alertId",
+          "in" : "path",
+          "description" : "Alert ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseEscalationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/auth/register" : {
+      "post" : {
+        "tags" : [ "Authentication" ],
+        "summary" : "Register a new user",
+        "description" : "Creates a new user account with a role (technician, manager, or fab_coordinator). Public endpoint, no authentication required. Returns the created user without a token.",
+        "operationId" : "register",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ ]
+      }
+    },
+    "/api/auth/login" : {
+      "post" : {
+        "tags" : [ "Authentication" ],
+        "summary" : "Log in and obtain a JWT",
+        "description" : "Authenticates a user by email/password and returns a bearer JWT plus the user profile. Public endpoint, no authentication required.",
+        "operationId" : "login",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseAuthResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ ]
+      }
+    },
+    "/api/technician/repairs/machines/{machineId}" : {
+      "get" : {
+        "tags" : [ "Technician — Repairs" ],
+        "summary" : "Get machine details for a repair",
+        "description" : "Returns machine details for a machine assigned to the calling technician for repair. Requires role TECHNICIAN.",
+        "operationId" : "getMachineDetails",
+        "parameters" : [ {
+          "name" : "machineId",
+          "in" : "path",
+          "description" : "Machine ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseMachineDetailsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/technician/repairs/alerts" : {
+      "get" : {
+        "tags" : [ "Technician — Repairs" ],
+        "summary" : "List my approved repair alerts",
+        "description" : "Returns approved alerts assigned to the calling technician for repair. Requires role TECHNICIAN.",
+        "operationId" : "getApprovedRepairAlerts",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListApprovedRepairAlertResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/technician/repairs/alerts/{alertId}" : {
+      "get" : {
+        "tags" : [ "Technician — Repairs" ],
+        "summary" : "Get a single approved repair alert",
+        "description" : "Returns a single approved repair alert assigned to the calling technician. Requires role TECHNICIAN.",
+        "operationId" : "getApprovedRepairAlert",
+        "parameters" : [ {
+          "name" : "alertId",
+          "in" : "path",
+          "description" : "Alert ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseApprovedRepairAlertResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/technician/checkups/machines/{machineId}" : {
+      "get" : {
+        "tags" : [ "Technician — Checkups" ],
+        "summary" : "Get machine details for a checkup",
+        "description" : "Returns machine details for a machine assigned to the calling technician for checkup. Requires role TECHNICIAN.",
+        "operationId" : "getMachineDetails_1",
+        "parameters" : [ {
+          "name" : "machineId",
+          "in" : "path",
+          "description" : "Machine ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseMachineDetailsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/technician/checkup-assignments" : {
+      "get" : {
+        "tags" : [ "Technician — Checkups" ],
+        "summary" : "List my assigned checkup work",
+        "description" : "Returns checkups currently assigned to the calling technician. Requires role TECHNICIAN.",
+        "operationId" : "getAssignedCheckupWorks",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListAssignedWorkResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/manager/technicians" : {
+      "get" : {
+        "tags" : [ "Manager — Machines & Technicians" ],
+        "summary" : "List all technicians",
+        "description" : "Returns every technician across the fab. Requires role MANAGER.",
+        "operationId" : "getAllTechnicians_1",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListTechnicianResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/manager/machines" : {
+      "get" : {
+        "tags" : [ "Manager — Machines & Technicians" ],
+        "summary" : "List all machines",
+        "description" : "Returns every machine across all fab coordinators. Requires role MANAGER.",
+        "operationId" : "getAllMachines",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListMachineResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/manager/alerts" : {
+      "get" : {
+        "tags" : [ "Manager — Alerts" ],
+        "summary" : "List all alerts",
+        "description" : "Returns every alert visible to managers. Requires role MANAGER.",
+        "operationId" : "getAllAlerts",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListAlertResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/manager/alerts/pending-approval" : {
+      "get" : {
+        "tags" : [ "Manager — Alerts" ],
+        "summary" : "List alerts pending manager approval",
+        "description" : "Returns alerts escalated by a fab coordinator that are awaiting manager approval. Requires role MANAGER.",
+        "operationId" : "getPendingManagerApprovalAlerts",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListAlertResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/machine-types" : {
+      "get" : {
+        "tags" : [ "Machine Types" ],
+        "summary" : "List all machine types",
+        "description" : "Returns all machine types. Available to any authenticated role.",
+        "operationId" : "getAllTypes",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListMachineTypeResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/machine-types/{typeId}/technicians" : {
+      "get" : {
+        "tags" : [ "Machine Types" ],
+        "summary" : "List technicians qualified for a machine type",
+        "description" : "Returns technicians qualified to service the given machine type. Requires role FAB_COORDINATOR.",
+        "operationId" : "getTechniciansByType",
+        "parameters" : [ {
+          "name" : "typeId",
+          "in" : "path",
+          "description" : "Machine type ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListTechnicianResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/machine-types/{typeId}/parameters" : {
+      "get" : {
+        "tags" : [ "Machine Types" ],
+        "summary" : "Get parameter rules for a machine type",
+        "description" : "Returns the checkup parameter rules configured for the given machine type. Available to any authenticated role.",
+        "operationId" : "getParameters",
+        "parameters" : [ {
+          "name" : "typeId",
+          "in" : "path",
+          "description" : "Machine type ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListParameterRuleResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/machine-types/{typeId}/machines" : {
+      "get" : {
+        "tags" : [ "Machine Types" ],
+        "summary" : "List machines of a given type",
+        "description" : "Returns machines of the given type. Requires role FAB_COORDINATOR or MANAGER.",
+        "operationId" : "getMachinesByType",
+        "parameters" : [ {
+          "name" : "typeId",
+          "in" : "path",
+          "description" : "Machine type ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListMachineResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/fab/alerts/{alertId}/candidate-technicians" : {
+      "get" : {
+        "tags" : [ "Fab — Alerts" ],
+        "summary" : "List candidate technicians for an alert",
+        "description" : "Returns technicians qualified to repair the machine associated with the given alert. Requires role FAB_COORDINATOR.",
+        "operationId" : "getMatchingTechnicians",
+        "parameters" : [ {
+          "name" : "alertId",
+          "in" : "path",
+          "description" : "Alert ID",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListTechnicianResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/fab/alerts/pending" : {
+      "get" : {
+        "tags" : [ "Fab — Alerts" ],
+        "summary" : "List pending alerts",
+        "description" : "Returns alerts awaiting fab-coordinator triage. Requires role FAB_COORDINATOR.",
+        "operationId" : "getPendingAlerts",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListAlertResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/fab/alerts/approved-unassigned" : {
+      "get" : {
+        "tags" : [ "Fab — Alerts" ],
+        "summary" : "List approved, unassigned alerts",
+        "description" : "Returns manager-approved alerts that do not yet have a repair technician assigned. Requires role FAB_COORDINATOR.",
+        "operationId" : "getApprovedUnassignedAlerts",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListAlertResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/dashboard/equipment" : {
+      "get" : {
+        "tags" : [ "Dashboard" ],
+        "summary" : "Get equipment history",
+        "description" : "Returns equipment checkup/repair history within an optional date range and machine type filter. Requires role MANAGER or FAB_COORDINATOR.",
+        "operationId" : "getDashboardHistory",
+        "parameters" : [ {
+          "name" : "fromDate",
+          "in" : "query",
+          "description" : "Start date (inclusive), ISO-8601 (yyyy-MM-dd)",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "name" : "toDate",
+          "in" : "query",
+          "description" : "End date (inclusive), ISO-8601 (yyyy-MM-dd)",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }, {
+          "name" : "typeId",
+          "in" : "query",
+          "description" : "Machine type ID filter; 0 means all types",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64",
+            "default" : 0
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseListDashboardHistoryResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "UpdateTechnicianRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "email" : {
+            "type" : "string",
+            "pattern" : "^[A-Za-z0-9._%+-]+@ehps\\.com$"
+          },
+          "phone" : {
+            "type" : "string",
+            "pattern" : "^\\d{10}$"
+          },
+          "speciality" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "name", "speciality" ]
+      },
+      "ApiResponseTechnicianResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/TechnicianResponse"
+          }
+        }
+      },
+      "TechnicianResponse" : {
+        "type" : "object",
+        "properties" : {
+          "technicianId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "phone" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "speciality" : {
+            "type" : "string"
+          }
+        }
+      },
+      "UpdateMachineRequest" : {
+        "type" : "object",
+        "properties" : {
+          "machineCode" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "typeId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "installDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        },
+        "required" : [ "machineCode", "typeId" ]
+      },
+      "ApiResponseMachineResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/MachineResponse"
+          }
+        }
+      },
+      "MachineResponse" : {
+        "type" : "object",
+        "properties" : {
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineCode" : {
+            "type" : "string"
+          },
+          "typeId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "typeName" : {
+            "type" : "string"
+          },
+          "installDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "fabCoordinatorId" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "CompleteRepairRequest" : {
+        "type" : "object",
+        "properties" : {
+          "changesDone" : {
+            "type" : "string"
+          },
+          "observations" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ApiResponseCompleteRepairResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/CompleteRepairResponse"
+          }
+        }
+      },
+      "CompleteRepairResponse" : {
+        "type" : "object",
+        "properties" : {
+          "alertId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineCode" : {
+            "type" : "string"
+          },
+          "alertStatus" : {
+            "type" : "string"
+          },
+          "repairRecorded" : {
+            "type" : "boolean"
+          },
+          "historyRecorded" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "PerformCheckupRequest" : {
+        "type" : "object",
+        "properties" : {
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "type" : "number",
+              "format" : "float"
+            }
+          }
+        },
+        "required" : [ "values" ]
+      },
+      "ApiResponsePerformCheckupResult" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/PerformCheckupResult"
+          }
+        }
+      },
+      "PerformCheckupResult" : {
+        "type" : "object",
+        "properties" : {
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineType" : {
+            "type" : "string"
+          },
+          "finalHealth" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "statuses" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "riskAlertCreated" : {
+            "type" : "boolean"
+          },
+          "riskAlertId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "severity" : {
+            "type" : "string"
+          }
+        }
+      },
+      "AlertActionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "alertId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "updatedStatus" : {
+            "type" : "string"
+          },
+          "managerId" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "ApiResponseAlertActionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/AlertActionResponse"
+          }
+        }
+      },
+      "AddTechnicianRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "email" : {
+            "type" : "string",
+            "pattern" : "^[A-Za-z0-9._%+-]+@ehps\\.com$"
+          },
+          "phone" : {
+            "type" : "string",
+            "pattern" : "^\\d{10}$"
+          },
+          "password" : {
+            "type" : "string",
+            "pattern" : "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
+          },
+          "speciality" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "name", "speciality" ]
+      },
+      "AddMachineRequest" : {
+        "type" : "object",
+        "properties" : {
+          "machineCode" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "typeId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "installDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        },
+        "required" : [ "machineCode", "typeId" ]
+      },
+      "AssignCheckupRequest" : {
+        "type" : "object",
+        "properties" : {
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "technicianId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "workDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        },
+        "required" : [ "machineId", "technicianId" ]
+      },
+      "ApiResponseCheckupAssignmentResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/CheckupAssignmentResponse"
+          }
+        }
+      },
+      "CheckupAssignmentResponse" : {
+        "type" : "object",
+        "properties" : {
+          "workId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "technicianId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "workType" : {
+            "type" : "string"
+          },
+          "workDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "AssignRepairRequest" : {
+        "type" : "object",
+        "properties" : {
+          "technicianId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "repairDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        },
+        "required" : [ "technicianId" ]
+      },
+      "ApiResponseAssignRepairResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/AssignRepairResponse"
+          }
+        }
+      },
+      "AssignRepairResponse" : {
+        "type" : "object",
+        "properties" : {
+          "alertId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "technicianId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "workType" : {
+            "type" : "string"
+          },
+          "workDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "ApiResponseEscalationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/EscalationResponse"
+          }
+        }
+      },
+      "EscalationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "alertId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "updatedStatus" : {
+            "type" : "string"
+          }
+        }
+      },
+      "RegisterRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "email" : {
+            "type" : "string",
+            "pattern" : "^[A-Za-z0-9._%+-]+@ehps\\.com$"
+          },
+          "phone" : {
+            "type" : "string",
+            "pattern" : "^\\d{10}$"
+          },
+          "password" : {
+            "type" : "string",
+            "pattern" : "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "manager", "fab_coordinator", "technician" ]
+          },
+          "speciality" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "name", "role" ]
+      },
+      "ApiResponseUserResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/UserResponse"
+          }
+        }
+      },
+      "UserResponse" : {
+        "type" : "object",
+        "properties" : {
+          "empId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "phone" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "speciality" : {
+            "type" : "string"
+          }
+        }
+      },
+      "LoginRequest" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email"
+          },
+          "password" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "password" ]
+      },
+      "ApiResponseAuthResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/AuthResponse"
+          }
+        }
+      },
+      "AuthResponse" : {
+        "type" : "object",
+        "properties" : {
+          "token" : {
+            "type" : "string"
+          },
+          "user" : {
+            "$ref" : "#/components/schemas/UserResponse"
+          }
+        }
+      },
+      "ApiResponseMachineDetailsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/MachineDetailsResponse"
+          }
+        }
+      },
+      "MachineDetailsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineCode" : {
+            "type" : "string"
+          },
+          "typeId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "typeName" : {
+            "type" : "string"
+          },
+          "installDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "fabCoordinatorId" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "ApiResponseListApprovedRepairAlertResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ApprovedRepairAlertResponse"
+            }
+          }
+        }
+      },
+      "ApprovedRepairAlertResponse" : {
+        "type" : "object",
+        "properties" : {
+          "alertId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineCode" : {
+            "type" : "string"
+          },
+          "problemMeasure" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "raisedOn" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "ApiResponseApprovedRepairAlertResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/ApprovedRepairAlertResponse"
+          }
+        }
+      },
+      "ApiResponseListAssignedWorkResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AssignedWorkResponse"
+            }
+          }
+        }
+      },
+      "AssignedWorkResponse" : {
+        "type" : "object",
+        "properties" : {
+          "workId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineCode" : {
+            "type" : "string"
+          },
+          "fabCoordinatorId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "workType" : {
+            "type" : "string"
+          },
+          "workDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "ApiResponseListTechnicianResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TechnicianResponse"
+            }
+          }
+        }
+      },
+      "ApiResponseListMachineResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MachineResponse"
+            }
+          }
+        }
+      },
+      "AlertResponse" : {
+        "type" : "object",
+        "properties" : {
+          "alertId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineCode" : {
+            "type" : "string"
+          },
+          "problemMeasure" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "raisedOn" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "fabCoordinatorId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "approvedById" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "assignedTechnicianId" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "ApiResponseListAlertResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AlertResponse"
+            }
+          }
+        }
+      },
+      "ApiResponseListMachineTypeResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MachineTypeResponse"
+            }
+          }
+        }
+      },
+      "MachineTypeResponse" : {
+        "type" : "object",
+        "properties" : {
+          "typeId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "typeName" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ApiResponseListParameterRuleResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ParameterRuleResponse"
+            }
+          }
+        }
+      },
+      "ParameterRuleResponse" : {
+        "type" : "object",
+        "properties" : {
+          "paramIndex" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "paramName" : {
+            "type" : "string"
+          },
+          "unit" : {
+            "type" : "string"
+          },
+          "good" : {
+            "type" : "string"
+          },
+          "warning" : {
+            "type" : "string"
+          },
+          "bad" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ApiResponseListDashboardHistoryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DashboardHistoryResponse"
+            }
+          }
+        }
+      },
+      "DashboardHistoryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "historyId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "machineCode" : {
+            "type" : "string"
+          },
+          "machineType" : {
+            "type" : "string"
+          },
+          "technicianId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "technicianName" : {
+            "type" : "string"
+          },
+          "alertId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "historyDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "issue" : {
+            "type" : "string"
+          },
+          "repairAction" : {
+            "type" : "string"
+          },
+          "observations" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+# Base configuration for the EHPS API.
+# Real settings live in the profile-specific files: application-local.yml (Docker Postgres),
+# application-prod.yml (env-var driven), and application-itest.yml (H2, tests).
+# When no profile is active, `local` is used. Override with SPRING_PROFILES_ACTIVE=prod in production.
+spring:
+  application:
+    name: ehps_api
+  profiles:
+    default: local
+
+# Actuator: health + info only, exposed on the web (details always shown for health).
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
